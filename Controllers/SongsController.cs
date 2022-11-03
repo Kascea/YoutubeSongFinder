@@ -2,9 +2,9 @@
 
 namespace MontageWebsite.Controllers
 {
-    public class SearchController : Controller
+    public class SongsController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Search()
         {
             return View();
         }
