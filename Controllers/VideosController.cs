@@ -18,25 +18,25 @@ namespace MontageWebsite.Controllers
             });
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string searchTerm)
         {
-            return View();
-        }
-        public IActionResult Search()
-        {
-            return View();
+            List<Video> videos = new List<Video>();
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                videos = await GetVideosAsync(searchTerm);
+            }
+            return View(videos);
         }
 
-        public async Task<IActionResult> GetVideos(string searchTerm)
+        private async Task<List<Video>> GetVideosAsync(string searchTerm)
         {
             var searchListRequest = youtubeService.Search.List("snippet");
             searchListRequest.Q = searchTerm;
-            searchListRequest.MaxResults = 5;
+            searchListRequest.MaxResults = 10;
 
             var searchListResponse = await searchListRequest.ExecuteAsync();
 
             List<Video> videos = new List<Video>();
-
             foreach (var searchResult in searchListResponse.Items)
             {
                 if (searchResult.Id.Kind == "youtube#video")
@@ -48,19 +48,13 @@ namespace MontageWebsite.Controllers
                         Description = searchResult.Snippet.Description,
                         ChannelID = searchResult.Id.ChannelId,
                         ChannelTitle = searchResult.Snippet.ChannelTitle,
-                        Thumbnail =  new Thumbnail()
-                        {
-                            VideoID = searchResult.Id.VideoId,
-                            Url = searchResult.Snippet.Thumbnails.Default__.Url,
-                            Width = searchResult.Snippet.Thumbnails.Default__.Width,
-                            Height = searchResult.Snippet.Thumbnails.Default__.Height
-                        }
+                        Submitted = true
                     };
                     videos.Add(video);
                 }
             }
 
-            return View("Index", videos.ToList());
+            return videos;
         }
     }
 }
