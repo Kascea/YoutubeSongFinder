@@ -7,54 +7,44 @@ namespace MontageWebsite.Controllers
 {
     public class VideosController : Controller
     {
-        private YouTubeService youtubeService;
+        private static VideoService YTService;
+        private static List<Video> Videos;
 
         public VideosController()
         {
-            youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            if(YTService == null)
             {
-                ApiKey = Environment.GetEnvironmentVariable("YOUTUBE_API_KEY", EnvironmentVariableTarget.Machine),
-                ApplicationName = this.GetType().ToString()
-            });
+                YTService = new VideoService();
+            }
+            if(Videos == null)
+            {
+                Videos = new List<Video>();
+            }
         }
 
         public async Task<IActionResult> Index(string searchTerm)
         {
-            List<Video> videos = new List<Video>();
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                videos = await GetVideosAsync(searchTerm);
+                Videos = await YTService.GetVideosAsync(searchTerm);
             }
-            return View(videos);
+            return View(Videos);
         }
 
-        private async Task<List<Video>> GetVideosAsync(string searchTerm)
+        [HttpPost]
+        public IActionResult SubmitVideoRequest(IFormCollection formval)
         {
-            var searchListRequest = youtubeService.Search.List("snippet");
-            searchListRequest.Q = searchTerm;
-            searchListRequest.MaxResults = 10;
-
-            var searchListResponse = await searchListRequest.ExecuteAsync();
-
-            List<Video> videos = new List<Video>();
-            foreach (var searchResult in searchListResponse.Items)
+            foreach(Video video in Videos)
             {
-                if (searchResult.Id.Kind == "youtube#video")
+                if(formval.ContainsKey(video.VideoID))
                 {
-                    Video video = new Video()
-                    {
-                        VideoID = searchResult.Id.VideoId,
-                        Title = searchResult.Snippet.Title,
-                        Description = searchResult.Snippet.Description,
-                        ChannelID = searchResult.Id.ChannelId,
-                        ChannelTitle = searchResult.Snippet.ChannelTitle,
-                        Submitted = true
-                    };
-                    videos.Add(video);
+                    //Add video to requested database
+
+                    video.Submitted = true;
                 }
             }
-
-            return videos;
+            return View("Index", Videos);
         }
+
     }
 }

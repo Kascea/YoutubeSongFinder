@@ -6,53 +6,53 @@
 
 <h1>Video Search</h1>
 <form asp-action="Index">
-  <div class="row">
-      <div class="col">
-          <input type="text" name="SearchTerm" class="form-control" placeholder="Search">
-      </div>
-      <div class="col">
-          <button type="submit" class="btn btn-primary">Submit</button>
-      </div>
-  </div>
+    <div class="input-group">
+        <input type="search" name="SearchTerm" class="form-control rounded" placeholder="Search">
+        <button type="submit" class="btn btn-outline-primary ">Search</button>
+    </div>
 </form>
 
 <hr/>
-
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    @for(int i = 0; i < Model.Count(); i++)
-    {
-        var item = Model[i];
-        if( i % 3 == 0) //close old row and start new row
+<form asp-action="SubmitVideoRequest" method="post"> @*Submit selected videos*@
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @for(int i = 0; i < Model.Count(); i++)
         {
-            @:</div><br/><div class="row row-cols-1 row-cols-md-3 g-4">
-        }
-        <div class="col">
-            <div class="card h-100">
-                <div class="card-header">
-                  @Html.DisplayFor(modelItem => item.ChannelTitle)
-                </div>
-                <iframe src ="@("https://www.youtube.com/embed/" + item.VideoID)" frameborder="0" allowfullscreen></iframe>
-                <div class="card-body">
-                  <h5 class="card-title"> @Html.DisplayFor(modelItem => item.Title) </h5>
-                  <p class="card-text"> @Html.DisplayFor(modelItem => item.Description) </p>
-       
-                </div>
-                @{
-                    if(item.Approved)
-                    {
-                        @:<div class="@("card-footer bg-success")"><small class="text-white">Approved</small></div>
+            var item = Model[i];
+            if( i % 3 == 0) //close old row and start new row
+            {
+                @:</div><br/><div class="row row-cols-1 row-cols-md-3 g-4">
+            }
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header">
+                      @Html.DisplayFor(modelItem => item.ChannelTitle)
+                    </div>
+                    <iframe src ="@("https://www.youtube.com/embed/" + item.VideoID)" frameborder="0" allowfullscreen></iframe>
+                    <div class="card-body">
+                      <h5 class="card-title"> @Html.DisplayFor(modelItem => item.Title) </h5>
+                      <p class="card-text"> @Html.DisplayFor(modelItem => item.Description) </p>
+                    </div>
+                    @{
+                        if(item.Approved)
+                        {
+                            <div class="@("card-footer bg-success")"><small class="text-white">Approved</small></div>
+                        }
+                        else if(item.Submitted)
+                        {
+                            <div class="@("card-footer bg-warning")"><small class="text-white">Awaiting approval</small></div>
+                        }
+                        else
+                        {
+                            <div class="card-footer">
+                                <input type="checkbox" id="@item.VideoID" name="@item.VideoID" />
+                                <label for="@item.VideoID">Request Video</label>
+                            </div>
+                        }
                     }
-                    else if(item.Submitted)
-                    {
-                        @:<div class="@("card-footer bg-warning")"><small class="text-white">Awaiting approval</small></div>
-                    }
-                }
+                </div>
             </div>
-        </div>
-    }
-</div>
-
-<hr/>
-<form asp-action=""> @*Submit selected videos*@
+        }
+    </div>
+    <hr/>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
