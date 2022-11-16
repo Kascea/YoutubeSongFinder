@@ -19,6 +19,7 @@ namespace MontageWebsite.Models
         {
             var searchListRequest = youtubeService.Search.List("snippet");
             searchListRequest.Q = searchTerm;
+            searchListRequest.Type = "video";
             searchListRequest.MaxResults = 10;
 
             var searchListResponse = await searchListRequest.ExecuteAsync();
@@ -30,11 +31,14 @@ namespace MontageWebsite.Models
                 {
                     Video video = new Video()
                     {
-                        VideoID = searchResult.Id.VideoId,
+                        ID = searchResult.Id.VideoId,
                         Title = searchResult.Snippet.Title,
                         Description = searchResult.Snippet.Description,
                         ChannelID = searchResult.Id.ChannelId,
-                        ChannelTitle = searchResult.Snippet.ChannelTitle
+                        ChannelTitle = searchResult.Snippet.ChannelTitle,
+                        ThumbnailUrl = searchResult.Snippet.Thumbnails.Medium.Url,
+                        ThumbnailHeight = searchResult.Snippet.Thumbnails.Medium.Height,
+                        ThumbnailWidth = searchResult.Snippet.Thumbnails.Medium.Width
                     };
                     videos.Add(video);
                 }

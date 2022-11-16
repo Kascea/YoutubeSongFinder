@@ -27,25 +27,25 @@
                     <div class="card-header">
                       @Html.DisplayFor(modelItem => item.ChannelTitle)
                     </div>
-                    <iframe src ="@("https://www.youtube.com/embed/" + item.VideoID)" frameborder="0" allowfullscreen></iframe>
+                    <img class="card-img-top" src="@item.ThumbnailUrl" alt="@item.Title" />
                     <div class="card-body">
                       <h5 class="card-title"> @Html.DisplayFor(modelItem => item.Title) </h5>
                       <p class="card-text"> @Html.DisplayFor(modelItem => item.Description) </p>
                     </div>
                     @{
-                        if(item.Approved)
+                        if(item.Status == "Approved")
                         {
                             <div class="@("card-footer bg-success")"><small class="text-white">Approved</small></div>
                         }
-                        else if(item.Submitted)
+                        else if(item.Status == "Submitted")
                         {
                             <div class="@("card-footer bg-warning")"><small class="text-white">Awaiting approval</small></div>
                         }
                         else
                         {
                             <div class="card-footer">
-                                <input type="checkbox" id="@item.VideoID" name="@item.VideoID" />
-                                <label for="@item.VideoID">Request Video</label>
+                                <input type="checkbox" id="@item.ID" name="@item.ID" />
+                                <label for="@item.ID">Request Video</label>
                             </div>
                         }
                     }

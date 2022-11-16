@@ -2,12 +2,14 @@
 using Google.Apis.YouTube.v3;
 using Google.Apis.Services;
 using MontageWebsite.Models;
+using System.Linq;
 
 namespace MontageWebsite.Controllers
 {
     public class VideosController : Controller
     {
         private static VideoService YTService;
+        private static DBService dbService;
         private static List<Video> Videos;
 
         public VideosController()
@@ -16,7 +18,11 @@ namespace MontageWebsite.Controllers
             {
                 YTService = new VideoService();
             }
-            if(Videos == null)
+            if (dbService == null)
+            {
+                dbService = new DBService();
+            }
+            if (Videos == null)
             {
                 Videos = new List<Video>();
             }
@@ -27,6 +33,14 @@ namespace MontageWebsite.Controllers
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 Videos = await YTService.GetVideosAsync(searchTerm);
+                Dictionary<string, string> statuses = dbService.GetStatuses(Videos);
+                foreach(Video video in Videos)
+                {
+                    if(statuses.ContainsKey(video.ID))
+                    {
+                        video.Status = statuses[video.ID];
+                    }
+                }
             }
             return View(Videos);
         }
@@ -36,14 +50,16 @@ namespace MontageWebsite.Controllers
         {
             foreach(Video video in Videos)
             {
-                if(formval.ContainsKey(video.VideoID))
+                if(formval.ContainsKey(video.ID))
                 {
-                    //Add video to requested database
-
-                    video.Submitted = true;
+                    bool isSubmitted = dbService.InsertSubmittedVideo(video);
+                    if(isSubmitted)
+                    {
+                        video.Status = "Submitted";
+                    }
                 }
             }
-            return View("Index", Videos);
+            return RedirectToAction("Index");
         }
 
     }
